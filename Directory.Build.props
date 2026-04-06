@@ -1,0 +1,52 @@
+<Project>
+    <!-- https://github.com/Keboo/DotnetTemplates/blob/main/templates/Library/NuGet/ -->
+
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>14</LangVersion>
+        <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    </PropertyGroup>
+
+    <PropertyGroup Label="NuGet Details">
+        <Title>$(ProjectName)</Title>
+        <Authors>Fachep</Authors>
+        <Description>Fachep's Windows Presentation Foundation Utilities</Description>
+        <Copyright>Copyright © 2026-$([System.DateTime]::Now.ToString("yyyy"))</Copyright>
+        <PackageTags>WPF</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/fachep/Fachep.WpfUtils</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/fachep/Fachep.WpfUtils</PackageProjectUrl>
+    </PropertyGroup>
+
+    <PropertyGroup Label="SourceLink">
+        <!--
+        https://github.com/dotnet/sourcelink
+        -->
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <ReadmeFile>$(SolutionDir)\README.md</ReadmeFile>
+        <LicenseFile>$(SolutionDir)\LICENSE</LicenseFile>
+
+        <ReadmeFile Condition="Exists('README.md')">README.md</ReadmeFile>
+        <LicenseFile Condition="Exists('LICENSE')">LICENSE</LicenseFile>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(IsPackable)' == true">
+        <None Include="$(ReadmeFile)" Pack="true" PackagePath="\" />
+        <None Include="$(LicenseFile)" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+</Project>
