@@ -13,6 +13,7 @@
         <Authors>Fachep</Authors>
         <Description>Fachep's Windows Presentation Foundation Utilities</Description>
         <Copyright>Copyright © 2026-$([System.DateTime]::Now.ToString("yyyy"))</Copyright>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <PackageTags>WPF</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
