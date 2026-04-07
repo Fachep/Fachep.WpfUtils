@@ -16,4 +16,5 @@
     </Folder>
     <Project Path="Fachep.WpfUtils.ViewManager.Tests/Fachep.WpfUtils.ViewManager.Tests.csproj" />
     <Project Path="Fachep.WpfUtils.ViewManager/Fachep.WpfUtils.ViewManager.csproj" />
+    <Project Path="Playground/Playground.csproj" />
 </Solution>
