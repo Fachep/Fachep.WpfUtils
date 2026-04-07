@@ -167,13 +167,10 @@ public static class ServiceCollectionExtensions
 
                 if (type.Name.EndsWith("ViewModel"))
                 {
-#if NETCOREAPP
-                    
-                    viewModels[type.Name[..^"ViewModel".Length]] = type;
-#else
-                    viewModels[type.Name.Substring(0, type.Name.Length - "ViewModel".Length)] = type;
-#endif
-                    continue;
+                    if (!viewModels.Remove(type.Name))
+                    {
+                        viewModels[type.Name] = type;
+                    }
                 }
 
                 if (!typeof(FrameworkElement).IsAssignableFrom(type)) continue;
@@ -209,7 +206,32 @@ public static class ServiceCollectionExtensions
 
             foreach (var viewType in viewWithoutViewModels)
             {
-                if (viewModels.TryGetValue(viewType.Name, out var viewModelType))
+                var viewName = viewType.Name;
+                if (viewName.EndsWith("View"))
+                {
+#if NETCOREAPP
+                    viewName = viewName[..^"View".Length];
+#else
+                    viewName = viewName.Substring(0, viewName.Length - "View".Length);
+#endif
+                }
+                else if (viewName.EndsWith("Page"))
+                {
+#if NETCOREAPP
+                    viewName = viewName[..^"Page".Length];
+#else
+                    viewName = viewName.Substring(0, viewName.Length - "Page".Length);
+#endif
+                }
+                else if (viewName.EndsWith("Window"))
+                {
+#if NETCOREAPP
+                    viewName = viewName[..^"Window".Length];
+#else
+                    viewName = viewName.Substring(0, viewName.Length - "Window".Length);
+#endif
+                }
+                if (viewModels.TryGetValue($"{viewName}ViewModel", out var viewModelType))
                 {
                     services.ConfigureView(viewType)
                         .WithViewModel(viewModelType);

@@ -1,5 +1,6 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Expression = System.Linq.Expressions.Expression;
 
 namespace Fachep.WpfUtils;
 
@@ -45,7 +46,18 @@ public class ViewBuilder
     {
         var wrapperType = typeof(FactoryViewWrapper<>).MakeGenericType(viewType);
         var adapterType = typeof(Func<,>).MakeGenericType(typeof(IServiceProvider), viewType);
-        var adapter = Delegate.CreateDelegate(adapterType, factory.Target, factory.Method);
+        Delegate adapter;
+        try
+        {
+            adapter = Delegate.CreateDelegate(adapterType, factory.Target, factory.Method);
+        }
+        catch (ArgumentException)
+        {
+            var spParam = Expression.Parameter(typeof(IServiceProvider), "sp");
+            var invokeExpr = Expression.Invoke(Expression.Constant(factory), spParam);
+            var castExpr = Expression.Convert(invokeExpr, viewType);
+            adapter = Expression.Lambda(adapterType, castExpr, spParam).Compile();
+        }
         var wrapper = (IViewWrapper)Activator.CreateInstance(wrapperType, adapter)!;
         return Create(viewType, services, viewLifetime, wrapper);
     }
@@ -95,8 +107,8 @@ public class ViewBuilder
 
         Type? IViewWrapper.DefaultViewModelType => _defaultViewModelType ?? _lastViewModelType;
 
-        private Type? _defaultViewModelType;
-        private Type? _lastViewModelType;
+        protected Type? _defaultViewModelType;
+        protected Type? _lastViewModelType;
         
         void IViewWrapper.WithViewModelType(Type viewModelType, bool isDefault)
         {
@@ -149,15 +161,20 @@ public class ViewBuilder
 
         protected override TView CreateInstance(IServiceProvider serviceProvider)
         {
-            var dispatcher = Application.Current.Dispatcher;
-            if (dispatcher.CheckAccess()) return (TView)_factory(serviceProvider, []);
-
+            if (Application.Current?.Dispatcher is not {} dispatcher || dispatcher.CheckAccess())
+            {
+                return (TView)_factory(serviceProvider, []);
+            }
             return (TView)dispatcher.Invoke(() => _factory(serviceProvider, []));
         }
 
         protected override ViewWrapper<TView> Clone()
         {
-            return new TypeViewWrapper<TView>(_implType, _factory);
+            return new TypeViewWrapper<TView>(_implType, _factory)
+            {
+                _defaultViewModelType = _defaultViewModelType,
+                _lastViewModelType = _lastViewModelType,
+            };
         }
     }
 
@@ -171,7 +188,11 @@ public class ViewBuilder
 
         protected override ViewWrapper<TView> Clone()
         {
-            return new FactoryViewWrapper<TView>(factory);
+            return new FactoryViewWrapper<TView>(factory)
+            {
+                _defaultViewModelType = _defaultViewModelType,
+                _lastViewModelType = _lastViewModelType,
+            };
         }
     }
 
@@ -202,7 +223,11 @@ public class ViewBuilder
 
         IViewWrapper IViewWrapper.Clone()
         {
-            return new InstanceViewWrapper<TView>(instance);
+            return new InstanceViewWrapper<TView>(instance)
+            {
+                _defaultViewModelType = _defaultViewModelType,
+                _lastViewModelType = _lastViewModelType,
+            };
         }
     }
 
