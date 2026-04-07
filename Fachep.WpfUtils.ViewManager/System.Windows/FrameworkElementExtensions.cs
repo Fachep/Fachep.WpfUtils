@@ -61,5 +61,43 @@ public static class FrameworkElementExtensions
         {
             return element.ViewManager.GetView<TView, TViewModel>(name, keyedViewModel, viewModelCallback);
         }
+        
+        public FrameworkElement? GetView(Type viewType, object viewModel)
+        {
+            return element.ViewManager.GetView(viewType, viewModel);
+        }
+
+        public TView? GetView<TView>(object viewModel)
+            where TView : FrameworkElement
+        {
+            return element.ViewManager.GetView<TView>(viewModel);
+        }
+
+        public FrameworkElement? GetViewByViewModel(Type viewModelType, object viewModel)
+        {
+            return element.ViewManager.GetViewByViewModel(viewModelType, viewModel);
+        }
+
+        public FrameworkElement? GetViewByViewModel<TViewModel>(TViewModel viewModel)
+        {
+            return element.ViewManager.GetViewByViewModel(viewModel);
+        }
+
+        public TView? GetViewByViewModel<TViewModel, TView>(TViewModel viewModel)
+            where TView : FrameworkElement
+        {
+            return element.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModel);
+        }
+
+        public FrameworkElement? GetView(string name, object viewModel)
+        {
+            return element.ViewManager.GetView(name, viewModel);
+        }
+
+        public TView? GetView<TView>(string name, object viewModel)
+            where TView : FrameworkElement
+        {
+            return element.ViewManager.GetView<TView>(name, viewModel);
+        }
     }
 }

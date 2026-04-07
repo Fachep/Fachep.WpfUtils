@@ -5,7 +5,7 @@ namespace Fachep.WpfUtils;
 
 public class ViewManager(IServiceProvider serviceProvider)
 {
-    internal const string ViewManagerResourceKey = "Fachep.WpfUtils.ViewManager";
+    internal const string ViewManagerResourceKey = "Fachep.WpfUtils.ViewManager.ViewManagerResourceKey";
 
     public FrameworkElement? GetView(Type viewType, Type? viewModelType = null,
         Action<object>? viewModelCallback = null)
@@ -33,6 +33,24 @@ public class ViewManager(IServiceProvider serviceProvider)
         return GetView(typeof(TView), typeof(TViewModel), callback) as TView;
     }
 
+    public FrameworkElement? GetView(Type viewType, object viewModel)
+    {
+        if (viewModel is Type viewModelType)
+        {
+            // fix generic type resolve
+            return GetView(viewType, viewModelType, viewModelCallback: null);
+        }
+        if (serviceProvider.GetService(viewType) is not FrameworkElement view) return null;
+        view.DataContext = viewModel;
+        return view;
+    }
+
+    public TView? GetView<TView>(object viewModel)
+        where TView : FrameworkElement
+    {
+        return GetView(typeof(TView), viewModel) as TView;
+    }
+
     public FrameworkElement? GetViewByViewModel(Type viewModelType, Action<object>? viewModelCallback = null)
     {
         var configType = typeof(ViewBuilder.IViewModelConfiguration<>).MakeGenericType(viewModelType);
@@ -51,6 +69,30 @@ public class ViewManager(IServiceProvider serviceProvider)
         where TView : FrameworkElement
     {
         return GetViewByViewModel(viewModelCallback) as TView;
+    }
+
+    public FrameworkElement? GetViewByViewModel(Type viewModelType, object viewModel)
+    {
+        var configType = typeof(ViewBuilder.IViewModelConfiguration<>).MakeGenericType(viewModelType);
+        if (serviceProvider.GetService(configType) is ViewBuilder.IViewModelConfiguration<object> config)
+            return GetView(config.ViewType, viewModel);
+        return null;
+    }
+
+    public FrameworkElement? GetViewByViewModel<TViewModel>(TViewModel viewModel)
+    {
+        if (viewModel is Type viewModelType)
+        {
+            // fix generic type resolve
+            return GetViewByViewModel(viewModelType, viewModelCallback: null);
+        }
+        return GetViewByViewModel(typeof(TViewModel), viewModel);
+    }
+    
+    public TView? GetViewByViewModel<TViewModel, TView>(TViewModel viewModel)
+        where TView : FrameworkElement
+    {
+        return GetViewByViewModel(viewModel) as TView;
     }
 
     public FrameworkElement? GetView(string name, Type? viewModelType = null, bool keyedViewModel = false,
@@ -84,5 +126,24 @@ public class ViewManager(IServiceProvider serviceProvider)
     {
         Action<object>? callback = viewModelCallback is null ? null : vm => viewModelCallback.Invoke((TViewModel)vm);
         return GetView(name, typeof(TViewModel), keyedViewModel, callback) as TView;
+    }
+    
+    public FrameworkElement? GetView(string name, object viewModel)
+    {
+        if (viewModel is Type viewModelType)
+        {
+            // fix generic type resolve
+            return GetView(name, viewModelType, keyedViewModel: false, viewModelCallback: null);
+        }
+        if (serviceProvider.GetKeyedService<ViewBuilder.IViewNameConfiguration>(name) is not { } config) return null;
+        if (serviceProvider.GetService(config.ViewType) is not FrameworkElement view) return null;
+        view.DataContext = viewModel;
+        return view;
+    }
+    
+    public TView? GetView<TView>(string name, object viewModel)
+        where TView : FrameworkElement
+    {
+        return GetView(name, viewModel) as TView;
     }
 }

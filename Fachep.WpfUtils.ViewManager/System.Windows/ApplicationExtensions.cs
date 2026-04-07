@@ -61,5 +61,43 @@ public static class ApplicationExtensions
         {
             return app.ViewManager.GetView<TView, TViewModel>(name, keyedViewModel, viewModelCallback);
         }
+
+        public FrameworkElement? GetView(Type viewType, object viewModel)
+        {
+            return app.ViewManager.GetView(viewType, viewModel);
+        }
+
+        public TView? GetView<TView>(object viewModel)
+            where TView : FrameworkElement
+        {
+            return app.ViewManager.GetView<TView>(viewModel);
+        }
+
+        public FrameworkElement? GetViewByViewModel(Type viewModelType, object viewModel)
+        {
+            return app.ViewManager.GetViewByViewModel(viewModelType, viewModel);
+        }
+
+        public FrameworkElement? GetViewByViewModel<TViewModel>(TViewModel viewModel)
+        {
+            return app.ViewManager.GetViewByViewModel(viewModel);
+        }
+
+        public TView? GetViewByViewModel<TViewModel, TView>(TViewModel viewModel)
+            where TView : FrameworkElement
+        {
+            return app.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModel);
+        }
+
+        public FrameworkElement? GetView(string name, object viewModel)
+        {
+            return app.ViewManager.GetView(name, viewModel);
+        }
+
+        public TView? GetView<TView>(string name, object viewModel)
+            where TView : FrameworkElement
+        {
+            return app.ViewManager.GetView<TView>(name, viewModel);
+        }
     }
 }
