@@ -1,0 +1,33 @@
+name: Publish ViewManager
+
+on:
+  push:
+    tags: [ 'ViewManager-v*' ]
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  prepare_meta:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse_meta.outputs.version }}
+    steps:
+      - name: Parse Metadata
+        id: parse_meta
+        run: |
+          "version="+"${{ github.ref_name }}".SubString(13) >> $env:GITHUB_OUTPUT
+
+  call_build:
+    needs: prepare_meta
+    uses: ./.github/workflows/build-and-deploy.yml
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: write
+    with:
+      project: ViewManager
+      version: ${{ needs.prepare_meta.outputs.version }}
+      test: true
+      publish: true

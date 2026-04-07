@@ -13,7 +13,10 @@
         <File Path=".github/dependabot.yml" />
     </Folder>
     <Folder Name="/Solution Items/Github/Actions/">
+        <File Path=".github/workflows/automerge-dependabot.yml" />
         <File Path=".github/workflows/build-and-deploy.yml" />
+        <File Path=".github/workflows/build-ViewManager.yml" />
+        <File Path=".github/workflows/publish-ViewManager.yml" />
     </Folder>
     <Project Path="Fachep.WpfUtils.ViewManager.Tests/Fachep.WpfUtils.ViewManager.Tests.csproj" />
     <Project Path="Fachep.WpfUtils.ViewManager/Fachep.WpfUtils.ViewManager.csproj" />
