@@ -1,6 +1,5 @@
 using System.Windows;
-using System.Windows.Controls;
-using Fachep.WpfUtils;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
@@ -89,8 +88,10 @@ public sealed class ViewBuilderTests
     {
         var services = new ServiceCollection();
         var factoryView = new TestView();
-        ViewBuilder.Create(typeof(TestView), services, ServiceLifetime.Singleton,
-            (Func<IServiceProvider, FrameworkElement>)(sp => factoryView));
+        ViewBuilder.Create(
+            typeof(TestView), services, ServiceLifetime.Singleton,
+            sp => factoryView
+        );
 
         var sp = services.BuildServiceProvider();
         var resolved = sp.GetService(typeof(TestView));
@@ -116,7 +117,7 @@ public sealed class ViewBuilderTests
     {
         var services = new ServiceCollection();
         var builder = ViewBuilder.Create(typeof(TestView), services, ServiceLifetime.Singleton, typeof(TestView));
-        builder.WithViewModel(typeof(TestViewModel), isDefault: true);
+        builder.WithViewModel(typeof(TestViewModel), true);
 
         var sp = services.BuildServiceProvider();
         var wrapperType = typeof(ViewBuilder.IViewWrapper<>).MakeGenericType(typeof(TestView));
@@ -145,7 +146,7 @@ public sealed class ViewBuilderTests
         var services = new ServiceCollection();
         var builder = ViewBuilder.Create(typeof(TestView), services, ServiceLifetime.Singleton, typeof(TestView));
         builder.WithViewModel(typeof(TestViewModel));
-        builder.WithViewModel(typeof(TestViewModel2), isDefault: true);
+        builder.WithViewModel(typeof(TestViewModel2), true);
 
         var sp = services.BuildServiceProvider();
         var wrapperType = typeof(ViewBuilder.IViewWrapper<>).MakeGenericType(typeof(TestView));
@@ -269,7 +270,7 @@ public sealed class ViewBuilderTests
         var services = new ServiceCollection();
         var instance = new TestView();
         var builder = ViewBuilder.Create(typeof(TestView), services, instance);
-        builder.WithViewModel(typeof(TestViewModel), isDefault: true);
+        builder.WithViewModel(typeof(TestViewModel), true);
 
         var sp = services.BuildServiceProvider();
         var wrapperType = typeof(ViewBuilder.IViewWrapper<>).MakeGenericType(typeof(TestView));
@@ -283,8 +284,10 @@ public sealed class ViewBuilderTests
     {
         var services = new ServiceCollection();
         var view = new TestView();
-        ViewBuilder.Create(typeof(TestView), services, ServiceLifetime.Singleton,
-            (Func<IServiceProvider, FrameworkElement>)(sp => view));
+        ViewBuilder.Create(
+            typeof(TestView), services, ServiceLifetime.Singleton,
+            sp => view
+        );
 
         var sp = services.BuildServiceProvider();
         var wrapperType = typeof(ViewBuilder.IViewWrapper<>).MakeGenericType(typeof(TestView));

@@ -4,5 +4,4 @@ namespace Playground;
 
 public class Page1ViewModel : ObservableObject
 {
-    
 }

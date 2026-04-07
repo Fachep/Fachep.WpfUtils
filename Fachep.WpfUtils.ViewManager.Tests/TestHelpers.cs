@@ -1,6 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
-using Fachep.WpfUtils;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
@@ -75,7 +75,8 @@ internal static class TestServiceProviderFactory
 {
     public static IServiceProvider BuildWithView<TView>(
         Action<ViewBuilder>? configure = null,
-        ServiceLifetime lifetime = ServiceLifetime.Singleton)
+        ServiceLifetime lifetime = ServiceLifetime.Singleton
+    )
         where TView : FrameworkElement
     {
         var services = new ServiceCollection();
@@ -86,7 +87,8 @@ internal static class TestServiceProviderFactory
 
     public static IServiceProvider BuildWithViewAndViewModel<TView, TViewModel>(
         ServiceLifetime viewLifetime = ServiceLifetime.Singleton,
-        ServiceLifetime vmLifetime = ServiceLifetime.Singleton)
+        ServiceLifetime vmLifetime = ServiceLifetime.Singleton
+    )
         where TView : FrameworkElement
         where TViewModel : class
     {

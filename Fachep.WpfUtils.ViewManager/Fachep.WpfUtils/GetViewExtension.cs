@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils;
@@ -12,19 +13,32 @@ public class GetViewExtension : MarkupExtension
 {
     private readonly Binding _binding;
     private ViewManager? _viewManager;
-    
+
+    public GetViewExtension()
+    {
+        _binding = new Binding
+        {
+            Mode = BindingMode.OneWay, Converter = new GetViewConverter(), ConverterParameter = this,
+        };
+    }
+
+    public GetViewExtension(string path) : this()
+    {
+        _binding.Path = new PropertyPath(path);
+    }
+
     public string ElementName
     {
         get => _binding.ElementName;
         set => _binding.ElementName = value;
     }
-    
+
     public PropertyPath Path
     {
         get => _binding.Path;
         set => _binding.Path = value;
     }
-    
+
     public RelativeSource RelativeSource
     {
         get => _binding.RelativeSource;
@@ -54,7 +68,7 @@ public class GetViewExtension : MarkupExtension
         get => _binding.FallbackValue;
         set => _binding.FallbackValue = value;
     }
-    
+
     public object TargetNullValue
     {
         get => _binding.TargetNullValue;
@@ -64,21 +78,6 @@ public class GetViewExtension : MarkupExtension
     [DefaultValue(GetViewMode.Auto)]
     public GetViewMode Mode { get; set; }
 
-    public GetViewExtension()
-    {
-        _binding = new Binding
-        {
-            Mode = BindingMode.OneWay,
-            Converter = new GetViewConverter(),
-            ConverterParameter = this,
-        };
-    }
-    
-    public GetViewExtension(string path) : this()
-    {
-        _binding.Path = new PropertyPath(path);
-    }
-    
     public override object? ProvideValue(IServiceProvider serviceProvider)
     {
         var target = serviceProvider.GetService<IProvideValueTarget>();
@@ -90,12 +89,14 @@ public class GetViewExtension : MarkupExtension
                 _viewManager ??= targetObject.ViewManager;
                 break;
             default:
-                throw new NotSupportedException($"Target object of type {target?.TargetObject.GetType()} is not supported.");
+                throw new NotSupportedException(
+                    $"Target object of type {target?.TargetObject.GetType()} is not supported."
+                );
         }
 
         return _binding.ProvideValue(serviceProvider);
     }
-    
+
     private class GetViewConverter : IValueConverter
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -110,7 +111,7 @@ public class GetViewExtension : MarkupExtension
 #endif
             var ext = (GetViewExtension)parameter!;
             var mode = ext.Mode;
-            
+
             var view = mode switch
             {
                 GetViewMode.Auto => value switch
@@ -120,11 +121,10 @@ public class GetViewExtension : MarkupExtension
                     _ => ext._viewManager!.GetViewByViewModel(value.GetType(), value),
                 },
                 GetViewMode.ByName => ext._viewManager!.GetView((string)value),
-                GetViewMode.ByViewModelType => ext._viewManager!.GetViewByViewModel((Type)value,
-                    viewModelCallback: null),
+                GetViewMode.ByViewModelType => ext._viewManager!.GetViewByViewModel((Type)value, null),
                 GetViewMode.ByViewType => ext._viewManager!.GetView((Type)value),
                 GetViewMode.ByTypeOfViewModelInstance => ext._viewManager!.GetViewByViewModel(value.GetType(), value),
-                _ => throw new ArgumentOutOfRangeException(nameof(GetViewExtension.Mode))
+                _ => throw new ArgumentOutOfRangeException(nameof(Mode)),
             };
             return view;
         }

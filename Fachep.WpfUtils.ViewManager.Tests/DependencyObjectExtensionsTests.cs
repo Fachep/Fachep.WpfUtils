@@ -1,6 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
-using Fachep.WpfUtils;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
@@ -9,7 +9,8 @@ namespace Fachep.WpfUtils.Tests;
 public sealed class DependencyObjectExtensionsTests
 {
     private static IServiceProvider BuildServiceProviderWithViewManagerInResources(
-        Action<IServiceCollection>? configureServices = null)
+        Action<IServiceCollection>? configureServices = null
+    )
     {
         var services = new ServiceCollection();
         services.AddSingleton<ViewManager>();
@@ -169,7 +170,7 @@ public sealed class DependencyObjectExtensionsTests
         var element = CreateElementWithViewManager(sp);
 
         var vm = new TestViewModel();
-        var view = element.GetView(typeof(TestView), (object)vm);
+        var view = element.GetView(typeof(TestView), vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -183,7 +184,7 @@ public sealed class DependencyObjectExtensionsTests
         var element = CreateElementWithViewManager(sp);
 
         var vm = new TestViewModel();
-        var view = element.GetView<TestView>((object)vm);
+        var view = element.GetView<TestView>(vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -198,7 +199,7 @@ public sealed class DependencyObjectExtensionsTests
         var element = CreateElementWithViewManager(sp);
 
         var vm = new TestViewModel();
-        var view = element.GetViewByViewModel(typeof(TestViewModel), (object)vm);
+        var view = element.GetViewByViewModel(typeof(TestViewModel), vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -213,7 +214,7 @@ public sealed class DependencyObjectExtensionsTests
         var element = CreateElementWithViewManager(sp);
 
         var vm = new TestViewModel();
-        var view = element.GetViewByViewModel<TestViewModel>(vm);
+        var view = element.GetViewByViewModel(vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -243,7 +244,7 @@ public sealed class DependencyObjectExtensionsTests
         var element = CreateElementWithViewManager(sp);
 
         var vm = new TestViewModel();
-        var view = element.GetView("Named", (object)vm);
+        var view = element.GetView("Named", vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -258,7 +259,7 @@ public sealed class DependencyObjectExtensionsTests
         var element = CreateElementWithViewManager(sp);
 
         var vm = new TestViewModel();
-        var view = element.GetView<TestView>("Named", (object)vm);
+        var view = element.GetView<TestView>("Named", vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -268,13 +269,13 @@ public sealed class DependencyObjectExtensionsTests
     {
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var element = CreateElementWithViewManager(sp);
 
         object? captured = null;
-        var view = element.GetView(typeof(TestView), (Action<object>)(vm => captured = vm));
+        var view = element.GetView(typeof(TestView), vm => captured = vm);
         Assert.IsNotNull(view);
         Assert.IsNotNull(captured);
     }
@@ -284,13 +285,13 @@ public sealed class DependencyObjectExtensionsTests
     {
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var element = CreateElementWithViewManager(sp);
 
         object? captured = null;
-        var view = element.GetView<TestView>((Action<object>)(vm => captured = vm));
+        var view = element.GetView<TestView>(vm => captured = vm);
         Assert.IsNotNull(view);
         Assert.IsNotNull(captured);
     }
@@ -301,13 +302,13 @@ public sealed class DependencyObjectExtensionsTests
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
             .WithName("Named")
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var element = CreateElementWithViewManager(sp);
 
         object? captured = null;
-        var view = element.GetView("Named", (Action<object>)(vm => captured = vm));
+        var view = element.GetView("Named", vm => captured = vm);
         Assert.IsNotNull(view);
         Assert.IsNotNull(captured);
     }
@@ -318,13 +319,13 @@ public sealed class DependencyObjectExtensionsTests
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
             .WithName("Named")
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var element = CreateElementWithViewManager(sp);
 
         object? captured = null;
-        var view = element.GetView<TestView>("Named", (Action<object>)(vm => captured = vm));
+        var view = element.GetView<TestView>("Named", vm => captured = vm);
         Assert.IsNotNull(view);
         Assert.IsNotNull(captured);
     }

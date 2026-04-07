@@ -1,6 +1,3 @@
-using System.Windows;
-using System.Windows.Controls;
-using Fachep.WpfUtils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
@@ -14,8 +11,10 @@ public sealed class ServiceCollectionExtensionsTests
     public void AddView_ByType_WithFactory_RegistersView()
     {
         var services = new ServiceCollection();
-        services.AddView(typeof(TestView), ServiceLifetime.Singleton,
-            (Func<IServiceProvider, FrameworkElement>)(sp => new TestView()));
+        services.AddView(
+            typeof(TestView), ServiceLifetime.Singleton,
+            sp => new TestView()
+        );
         var sp = services.BuildServiceProvider();
 
         var view = sp.GetService(typeof(TestView));
@@ -131,9 +130,14 @@ public sealed class ServiceCollectionExtensionsTests
 
         TestView? v1, v2;
         using (var scope1 = sp.CreateScope())
+        {
             v1 = scope1.ServiceProvider.GetService<TestView>();
+        }
+
         using (var scope2 = sp.CreateScope())
+        {
             v2 = scope2.ServiceProvider.GetService<TestView>();
+        }
 
         Assert.IsNotNull(v1);
         Assert.IsNotNull(v2);
@@ -211,8 +215,10 @@ public sealed class ServiceCollectionExtensionsTests
     {
         var services = new ServiceCollection();
         var expected = new TestView();
-        services.AddView(typeof(TestView), ServiceLifetime.Singleton,
-            (Func<IServiceProvider, FrameworkElement>)(sp => expected));
+        services.AddView(
+            typeof(TestView), ServiceLifetime.Singleton,
+            sp => expected
+        );
         var sp = services.BuildServiceProvider();
 
         var view = sp.GetService(typeof(TestView));
@@ -236,8 +242,10 @@ public sealed class ServiceCollectionExtensionsTests
     {
         var services = new ServiceCollection();
         var expected = new TestView();
-        services.AddSingletonView(typeof(TestView),
-            (Func<IServiceProvider, FrameworkElement>)(sp => expected));
+        services.AddSingletonView(
+            typeof(TestView),
+            sp => expected
+        );
         var sp = services.BuildServiceProvider();
 
         var view = sp.GetService(typeof(TestView));
@@ -260,8 +268,10 @@ public sealed class ServiceCollectionExtensionsTests
     public void AddScopedView_WithFactory_RegistersView()
     {
         var services = new ServiceCollection();
-        services.AddScopedView(typeof(TestView),
-            (Func<IServiceProvider, FrameworkElement>)(sp => new TestView()));
+        services.AddScopedView(
+            typeof(TestView),
+            sp => new TestView()
+        );
         var sp = services.BuildServiceProvider();
 
         using var scope = sp.CreateScope();
@@ -285,8 +295,10 @@ public sealed class ServiceCollectionExtensionsTests
     public void AddTransientView_WithFactory_RegistersView()
     {
         var services = new ServiceCollection();
-        services.AddTransientView(typeof(TestView),
-            (Func<IServiceProvider, FrameworkElement>)(sp => new TestView()));
+        services.AddTransientView(
+            typeof(TestView),
+            sp => new TestView()
+        );
         var sp = services.BuildServiceProvider();
 
         var v1 = sp.GetService(typeof(TestView));
@@ -471,7 +483,8 @@ public sealed class ServiceCollectionExtensionsTests
     {
         var services = new ServiceCollection();
         Assert.ThrowsExactly<ArgumentException>(() =>
-            services.AddViews(typeof(AttributedView).Assembly, typeof(TestView)));
+            services.AddViews(typeof(AttributedView).Assembly, typeof(TestView))
+        );
     }
 
     [TestMethod]

@@ -584,3 +584,6 @@ __MACOSX/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+.agents/
+skills-lock.json

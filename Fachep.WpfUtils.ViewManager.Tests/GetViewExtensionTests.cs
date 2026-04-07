@@ -1,9 +1,5 @@
-using System.Globalization;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using Fachep.WpfUtils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
 

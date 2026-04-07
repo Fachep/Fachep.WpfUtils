@@ -8,8 +8,11 @@ public static class ApplicationExtensions
     {
         public ViewManager ViewManager => (ViewManager)app.Resources[ViewManager.ViewManagerResourceKey]!;
 
-        public FrameworkElement? GetView(Type viewType, Type? viewModelType = null,
-            Action<object>? viewModelCallback = null)
+        public FrameworkElement? GetView(
+            Type viewType,
+            Type? viewModelType = null,
+            Action<object>? viewModelCallback = null
+        )
         {
             return app.ViewManager.GetView(viewType, viewModelType, viewModelCallback);
         }
@@ -42,21 +45,32 @@ public static class ApplicationExtensions
             return app.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModelCallback);
         }
 
-        public FrameworkElement? GetView(string name, Type? viewModelType = null, bool keyedViewModel = false,
-            Action<object>? viewModelCallback = null)
+        public FrameworkElement? GetView(
+            string name,
+            Type? viewModelType = null,
+            bool keyedViewModel = false,
+            Action<object>? viewModelCallback = null
+        )
         {
             return app.ViewManager.GetView(name, viewModelType, keyedViewModel, viewModelCallback);
         }
 
-        public TView? GetView<TView>(string name, Type? viewModelType = null, bool keyedViewModel = false,
-            Action<object>? viewModelCallback = null)
+        public TView? GetView<TView>(
+            string name,
+            Type? viewModelType = null,
+            bool keyedViewModel = false,
+            Action<object>? viewModelCallback = null
+        )
             where TView : FrameworkElement
         {
             return app.ViewManager.GetView<TView>(name, viewModelType, keyedViewModel, viewModelCallback);
         }
 
-        public TView? GetView<TView, TViewModel>(string name, bool keyedViewModel = false,
-            Action<TViewModel>? viewModelCallback = null)
+        public TView? GetView<TView, TViewModel>(
+            string name,
+            bool keyedViewModel = false,
+            Action<TViewModel>? viewModelCallback = null
+        )
             where TView : FrameworkElement
         {
             return app.ViewManager.GetView<TView, TViewModel>(name, keyedViewModel, viewModelCallback);

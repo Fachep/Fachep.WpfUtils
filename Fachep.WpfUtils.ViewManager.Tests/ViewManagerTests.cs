@@ -1,6 +1,3 @@
-using System.Windows;
-using System.Windows.Controls;
-using Fachep.WpfUtils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
@@ -71,7 +68,7 @@ public sealed class ViewManagerTests
     {
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
@@ -101,13 +98,13 @@ public sealed class ViewManagerTests
     {
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
         object? captured = null;
-        var view = manager.GetView(typeof(TestView), (Action<object>)(vm => captured = vm));
+        var view = manager.GetView(typeof(TestView), vm => captured = vm);
         Assert.IsNotNull(view);
         Assert.IsNotNull(captured);
     }
@@ -148,7 +145,7 @@ public sealed class ViewManagerTests
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
-        var view = manager.GetView<TestView>(viewModelType: typeof(TestViewModel));
+        var view = manager.GetView<TestView>(typeof(TestViewModel));
         Assert.IsNotNull(view);
         Assert.IsInstanceOfType<TestViewModel>(view.DataContext);
     }
@@ -158,13 +155,13 @@ public sealed class ViewManagerTests
     {
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
         object? captured = null;
-        var view = manager.GetView<TestView>((Action<object>)(vm => captured = vm));
+        var view = manager.GetView<TestView>(vm => captured = vm);
         Assert.IsNotNull(view);
         Assert.IsNotNull(captured);
     }
@@ -211,7 +208,7 @@ public sealed class ViewManagerTests
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
-        var view = manager.GetView<TestView, TestViewModel>((Action<TestViewModel>?)null);
+        var view = manager.GetView<TestView, TestViewModel>();
         Assert.IsNotNull(view);
     }
 
@@ -226,7 +223,7 @@ public sealed class ViewManagerTests
         var manager = sp.GetRequiredService<ViewManager>();
 
         var vm = new TestViewModel();
-        var view = manager.GetView(typeof(TestView), (object)vm);
+        var view = manager.GetView(typeof(TestView), vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -255,7 +252,7 @@ public sealed class ViewManagerTests
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
-        var view = manager.GetView(typeof(TestView), (object)new TestViewModel());
+        var view = manager.GetView(typeof(TestView), new TestViewModel());
         Assert.IsNull(view);
     }
 
@@ -268,7 +265,7 @@ public sealed class ViewManagerTests
         var manager = sp.GetRequiredService<ViewManager>();
 
         var vm = new TestViewModel();
-        var view = manager.GetView<TestView>((object)vm);
+        var view = manager.GetView<TestView>(vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -372,7 +369,7 @@ public sealed class ViewManagerTests
         var manager = sp.GetRequiredService<ViewManager>();
 
         var vm = new TestViewModel();
-        var view = manager.GetViewByViewModel(typeof(TestViewModel), (object)vm);
+        var view = manager.GetViewByViewModel(typeof(TestViewModel), vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -385,7 +382,7 @@ public sealed class ViewManagerTests
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
-        var view = manager.GetViewByViewModel(typeof(TestViewModel), (object)new TestViewModel());
+        var view = manager.GetViewByViewModel(typeof(TestViewModel), new TestViewModel());
         Assert.IsNull(view);
     }
 
@@ -399,7 +396,7 @@ public sealed class ViewManagerTests
         var manager = sp.GetRequiredService<ViewManager>();
 
         var vm = new TestViewModel();
-        var view = manager.GetViewByViewModel<TestViewModel>(vm);
+        var view = manager.GetViewByViewModel(vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -417,7 +414,7 @@ public sealed class ViewManagerTests
 
         // This calls GetViewByViewModel<Type>(typeof(TestViewModel))
         // which triggers the `is Type` branch
-        var view = manager.GetViewByViewModel<Type>(typeof(TestViewModel));
+        var view = manager.GetViewByViewModel(typeof(TestViewModel));
         Assert.IsNotNull(view);
     }
 
@@ -486,7 +483,7 @@ public sealed class ViewManagerTests
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
             .WithName("MyView")
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
@@ -504,11 +501,11 @@ public sealed class ViewManagerTests
         services.AddSingletonView<TestView>(sp => new TestView())
             .WithName("MyView")
             .WithViewModel(typeof(TestViewModel));
-        services.AddKeyedSingleton<TestViewModel>("MyView", keyedVm);
+        services.AddKeyedSingleton("MyView", keyedVm);
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
-        var view = manager.GetView("MyView", typeof(TestViewModel), keyedViewModel: true);
+        var view = manager.GetView("MyView", typeof(TestViewModel), true);
         Assert.IsNotNull(view);
         Assert.AreSame(keyedVm, view.DataContext);
     }
@@ -519,7 +516,7 @@ public sealed class ViewManagerTests
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
             .WithName("MyView")
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
@@ -535,13 +532,13 @@ public sealed class ViewManagerTests
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
             .WithName("MyView")
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
         object? captured = null;
-        manager.GetView("MyView", (Action<object>)(vm => captured = vm));
+        manager.GetView("MyView", vm => captured = vm);
         Assert.IsNotNull(captured);
     }
 
@@ -596,13 +593,13 @@ public sealed class ViewManagerTests
         var services = new ServiceCollection();
         services.AddSingletonView<TestView>(sp => new TestView())
             .WithName("MyView")
-            .WithViewModel(typeof(TestViewModel), isDefault: true);
+            .WithViewModel(typeof(TestViewModel), true);
         services.AddSingleton<TestViewModel>();
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
         object? captured = null;
-        var view = manager.GetView<TestView>("MyView", (Action<object>)(vm => captured = vm));
+        var view = manager.GetView<TestView>("MyView", vm => captured = vm);
         Assert.IsNotNull(view);
         Assert.IsNotNull(captured);
     }
@@ -653,7 +650,7 @@ public sealed class ViewManagerTests
         var manager = sp.GetRequiredService<ViewManager>();
 
         var vm = new TestViewModel();
-        var view = manager.GetView("MyView", (object)vm);
+        var view = manager.GetView("MyView", vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -682,7 +679,7 @@ public sealed class ViewManagerTests
         var sp = services.BuildServiceProvider();
         var manager = sp.GetRequiredService<ViewManager>();
 
-        var view = manager.GetView("NonExistent", (object)new TestViewModel());
+        var view = manager.GetView("NonExistent", new TestViewModel());
         Assert.IsNull(view);
     }
 
@@ -696,7 +693,7 @@ public sealed class ViewManagerTests
         var manager = sp.GetRequiredService<ViewManager>();
 
         var vm = new TestViewModel();
-        var view = manager.GetView<TestView>("MyView", (object)vm);
+        var view = manager.GetView<TestView>("MyView", vm);
         Assert.IsNotNull(view);
         Assert.AreSame(vm, view.DataContext);
     }
@@ -706,7 +703,9 @@ public sealed class ViewManagerTests
     [TestMethod]
     public void ViewManagerResourceKey_IsExpectedValue()
     {
-        Assert.AreEqual("Fachep.WpfUtils.ViewManager.ViewManagerResourceKey",
-            ViewManager.ViewManagerResourceKey);
+        Assert.AreEqual(
+            "Fachep.WpfUtils.ViewManager.ViewManagerResourceKey",
+            ViewManager.ViewManagerResourceKey
+        );
     }
 }

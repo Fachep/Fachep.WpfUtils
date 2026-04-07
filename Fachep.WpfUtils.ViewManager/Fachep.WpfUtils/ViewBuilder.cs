@@ -1,5 +1,7 @@
 using System.Windows;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Expression = System.Linq.Expressions.Expression;
 
 namespace Fachep.WpfUtils;
@@ -16,8 +18,12 @@ public class ViewBuilder
         _services = services;
     }
 
-    private static ViewBuilder Create(Type viewType, IServiceCollection services, ServiceLifetime viewLifetime,
-        IViewWrapper viewWrapper)
+    private static ViewBuilder Create(
+        Type viewType,
+        IServiceCollection services,
+        ServiceLifetime viewLifetime,
+        IViewWrapper viewWrapper
+    )
     {
         var wrapperType = typeof(IViewWrapper<>).MakeGenericType(viewType);
         services
@@ -41,8 +47,12 @@ public class ViewBuilder
         return Create(viewType, services, ServiceLifetime.Singleton, wrapper);
     }
 
-    internal static ViewBuilder Create(Type viewType, IServiceCollection services,
-        ServiceLifetime viewLifetime, Func<IServiceProvider, FrameworkElement> factory)
+    internal static ViewBuilder Create(
+        Type viewType,
+        IServiceCollection services,
+        ServiceLifetime viewLifetime,
+        Func<IServiceProvider, FrameworkElement> factory
+    )
     {
         var wrapperType = typeof(FactoryViewWrapper<>).MakeGenericType(viewType);
         var adapterType = typeof(Func<,>).MakeGenericType(typeof(IServiceProvider), viewType);
@@ -58,12 +68,17 @@ public class ViewBuilder
             var castExpr = Expression.Convert(invokeExpr, viewType);
             adapter = Expression.Lambda(adapterType, castExpr, spParam).Compile();
         }
+
         var wrapper = (IViewWrapper)Activator.CreateInstance(wrapperType, adapter)!;
         return Create(viewType, services, viewLifetime, wrapper);
     }
 
-    internal static ViewBuilder Create(Type viewType, IServiceCollection services, ServiceLifetime viewLifetime,
-        Type implType)
+    internal static ViewBuilder Create(
+        Type viewType,
+        IServiceCollection services,
+        ServiceLifetime viewLifetime,
+        Type implType
+    )
     {
         var wrapperType = typeof(TypeViewWrapper<>).MakeGenericType(viewType);
         var wrapper = (IViewWrapper)Activator.CreateInstance(wrapperType, implType)!;
@@ -72,8 +87,10 @@ public class ViewBuilder
 
     public ViewBuilder WithViewModel(Type viewModelType, bool isDefault = false)
     {
-        _services.AddSingleton(typeof(IViewModelConfiguration<>).MakeGenericType(viewModelType),
-            new ViewModelConfiguration(_viewType));
+        _services.AddSingleton(
+            typeof(IViewModelConfiguration<>).MakeGenericType(viewModelType),
+            new ViewModelConfiguration(_viewType)
+        );
         _viewWrapper?.WithViewModelType(viewModelType, isDefault);
         return this;
     }
@@ -86,9 +103,9 @@ public class ViewBuilder
 
     internal interface IViewWrapper
     {
+        Type? DefaultViewModelType { get; }
         FrameworkElement GetInstance(IServiceProvider serviceProvider);
         void WithViewModelType(Type viewModelType, bool isDefault = false);
-        Type? DefaultViewModelType { get; }
         IViewWrapper Clone();
     }
 
@@ -109,7 +126,7 @@ public class ViewBuilder
 
         protected Type? _defaultViewModelType;
         protected Type? _lastViewModelType;
-        
+
         void IViewWrapper.WithViewModelType(Type viewModelType, bool isDefault)
         {
             if (isDefault)
@@ -125,10 +142,12 @@ public class ViewBuilder
         FrameworkElement IViewWrapper.GetInstance(IServiceProvider serviceProvider)
         {
             if (_instance == null)
+            {
                 lock (_lock)
                 {
                     _instance ??= CreateInstance(serviceProvider);
                 }
+            }
 
             return _instance;
         }
@@ -161,10 +180,11 @@ public class ViewBuilder
 
         protected override TView CreateInstance(IServiceProvider serviceProvider)
         {
-            if (Application.Current?.Dispatcher is not {} dispatcher || dispatcher.CheckAccess())
+            if (Application.Current?.Dispatcher is not { } dispatcher || dispatcher.CheckAccess())
             {
                 return (TView)_factory(serviceProvider, []);
             }
+
             return (TView)dispatcher.Invoke(() => _factory(serviceProvider, []));
         }
 
@@ -172,8 +192,7 @@ public class ViewBuilder
         {
             return new TypeViewWrapper<TView>(_implType, _factory)
             {
-                _defaultViewModelType = _defaultViewModelType,
-                _lastViewModelType = _lastViewModelType,
+                _defaultViewModelType = _defaultViewModelType, _lastViewModelType = _lastViewModelType,
             };
         }
     }
@@ -190,8 +209,7 @@ public class ViewBuilder
         {
             return new FactoryViewWrapper<TView>(factory)
             {
-                _defaultViewModelType = _defaultViewModelType,
-                _lastViewModelType = _lastViewModelType,
+                _defaultViewModelType = _defaultViewModelType, _lastViewModelType = _lastViewModelType,
             };
         }
     }
@@ -199,11 +217,10 @@ public class ViewBuilder
     private class InstanceViewWrapper<TView>(TView instance) : IViewWrapper<TView>
         where TView : FrameworkElement
     {
-        Type? IViewWrapper.DefaultViewModelType => _defaultViewModelType ?? _lastViewModelType;
-
         private Type? _defaultViewModelType;
         private Type? _lastViewModelType;
-        
+        Type? IViewWrapper.DefaultViewModelType => _defaultViewModelType ?? _lastViewModelType;
+
         void IViewWrapper.WithViewModelType(Type viewModelType, bool isDefault)
         {
             if (isDefault)
@@ -215,7 +232,7 @@ public class ViewBuilder
                 _lastViewModelType = viewModelType;
             }
         }
-        
+
         FrameworkElement IViewWrapper.GetInstance(IServiceProvider serviceProvider)
         {
             return instance;
@@ -225,8 +242,7 @@ public class ViewBuilder
         {
             return new InstanceViewWrapper<TView>(instance)
             {
-                _defaultViewModelType = _defaultViewModelType,
-                _lastViewModelType = _lastViewModelType,
+                _defaultViewModelType = _defaultViewModelType, _lastViewModelType = _lastViewModelType,
             };
         }
     }

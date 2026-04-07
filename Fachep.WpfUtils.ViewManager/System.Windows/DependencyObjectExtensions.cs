@@ -6,23 +6,22 @@ public static class DependencyObjectExtensions
 {
     extension(DependencyObject targetObject)
     {
-        public ViewManager ViewManager
-        {
-            get
+        public ViewManager ViewManager =>
+            targetObject switch
             {
-                return targetObject switch
-                {
-                    FrameworkElement fe => (ViewManager)fe.FindResource(ViewManager.ViewManagerResourceKey),
-                    FrameworkContentElement fce => (ViewManager)fce.FindResource(ViewManager.ViewManagerResourceKey),
-                    _ => (ViewManager)Application.Current.FindResource(ViewManager.ViewManagerResourceKey) ??
-                         throw new InvalidOperationException(
-                             $"Cannot find {nameof(ViewManager)} resource for {targetObject.GetType().FullName}")
-                };
-            }
-        }
+                FrameworkElement fe => (ViewManager)fe.FindResource(ViewManager.ViewManagerResourceKey),
+                FrameworkContentElement fce => (ViewManager)fce.FindResource(ViewManager.ViewManagerResourceKey),
+                _ => (ViewManager?)Application.Current?.FindResource(ViewManager.ViewManagerResourceKey) ??
+                     throw new InvalidOperationException(
+                         $"Cannot find {nameof(ViewManager)} resource for {targetObject.GetType().FullName}"
+                     ),
+            };
 
-        public FrameworkElement? GetView(Type viewType, Type? viewModelType = null,
-            Action<object>? viewModelCallback = null)
+        public FrameworkElement? GetView(
+            Type viewType,
+            Type? viewModelType = null,
+            Action<object>? viewModelCallback = null
+        )
         {
             return targetObject.ViewManager.GetView(viewType, viewModelType, viewModelCallback);
         }
@@ -55,26 +54,37 @@ public static class DependencyObjectExtensions
             return targetObject.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModelCallback);
         }
 
-        public FrameworkElement? GetView(string name, Type? viewModelType = null, bool keyedViewModel = false,
-            Action<object>? viewModelCallback = null)
+        public FrameworkElement? GetView(
+            string name,
+            Type? viewModelType = null,
+            bool keyedViewModel = false,
+            Action<object>? viewModelCallback = null
+        )
         {
             return targetObject.ViewManager.GetView(name, viewModelType, keyedViewModel, viewModelCallback);
         }
 
-        public TView? GetView<TView>(string name, Type? viewModelType = null, bool keyedViewModel = false,
-            Action<object>? viewModelCallback = null)
+        public TView? GetView<TView>(
+            string name,
+            Type? viewModelType = null,
+            bool keyedViewModel = false,
+            Action<object>? viewModelCallback = null
+        )
             where TView : FrameworkElement
         {
             return targetObject.ViewManager.GetView<TView>(name, viewModelType, keyedViewModel, viewModelCallback);
         }
 
-        public TView? GetView<TView, TViewModel>(string name, bool keyedViewModel = false,
-            Action<TViewModel>? viewModelCallback = null)
+        public TView? GetView<TView, TViewModel>(
+            string name,
+            bool keyedViewModel = false,
+            Action<TViewModel>? viewModelCallback = null
+        )
             where TView : FrameworkElement
         {
             return targetObject.ViewManager.GetView<TView, TViewModel>(name, keyedViewModel, viewModelCallback);
         }
-        
+
         public FrameworkElement? GetView(Type viewType, object viewModel)
         {
             return targetObject.ViewManager.GetView(viewType, viewModel);
@@ -112,8 +122,7 @@ public static class DependencyObjectExtensions
         {
             return targetObject.ViewManager.GetView<TView>(name, viewModel);
         }
-        
-        
+
         public FrameworkElement? GetView(Type viewType, Action<object> viewModelCallback)
         {
             return targetObject.ViewManager.GetView(viewType, viewModelCallback);

@@ -1,20 +1,19 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Playground;
 
 /// <summary>
-/// Interaction logic for App.xaml
+///     Interaction logic for App.xaml
 /// </summary>
 public partial class App : Application
 {
-    public App() 
+    public App()
     {
         InitializeComponent();
     }
-    
+
     protected override void OnStartup(StartupEventArgs e)
     {
         var mainWindow = this.GetView<MainWindow>();
@@ -22,9 +21,9 @@ public partial class App : Application
         MainWindow.Visibility = Visibility.Visible;
         base.OnStartup(e);
     }
-    
+
     [STAThread]
-    public static void Main() 
+    public static void Main()
     {
         var services = new ServiceCollection()
             .AddViews()

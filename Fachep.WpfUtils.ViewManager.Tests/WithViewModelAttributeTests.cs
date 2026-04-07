@@ -1,4 +1,3 @@
-using Fachep.WpfUtils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
@@ -23,10 +22,7 @@ public sealed class WithViewModelAttributeTests
     [TestMethod]
     public void LifeTime_CanBeSet()
     {
-        var attr = new WithViewModelAttribute(typeof(TestViewModel))
-        {
-            LifeTime = ServiceLifetime.Transient
-        };
+        var attr = new WithViewModelAttribute(typeof(TestViewModel)) { LifeTime = ServiceLifetime.Transient };
         Assert.AreEqual(ServiceLifetime.Transient, attr.LifeTime);
     }
 
@@ -48,7 +44,8 @@ public sealed class WithViewModelAttributeTests
     public void AttributeUsage_ClassAndStruct_AllowMultiple_NotInherited()
     {
         var usage = (AttributeUsageAttribute)Attribute.GetCustomAttribute(
-            typeof(WithViewModelAttribute), typeof(AttributeUsageAttribute))!;
+            typeof(WithViewModelAttribute), typeof(AttributeUsageAttribute)
+        )!;
         Assert.AreEqual(AttributeTargets.Class | AttributeTargets.Struct, usage.ValidOn);
         Assert.IsTrue(usage.AllowMultiple);
         Assert.IsFalse(usage.Inherited);

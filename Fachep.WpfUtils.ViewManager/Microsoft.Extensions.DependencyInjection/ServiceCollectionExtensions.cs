@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+
 using Fachep.WpfUtils;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -81,8 +82,11 @@ public static class ServiceCollectionExtensions
             return ViewBuilder.Create(typeof(TView), services, ServiceLifetime.Transient, typeof(TViewImpl));
         }
 
-        public ViewBuilder AddView(Type viewType, ServiceLifetime viewLifetime,
-            Func<IServiceProvider, FrameworkElement> factory)
+        public ViewBuilder AddView(
+            Type viewType,
+            ServiceLifetime viewLifetime,
+            Func<IServiceProvider, FrameworkElement> factory
+        )
         {
             return ViewBuilder.Create(viewType, services, viewLifetime, factory);
         }
@@ -150,14 +154,19 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddViews(Assembly? assembly = null, Type? appType = null)
         {
             if (appType is not null && !typeof(Application).IsAssignableFrom(appType))
+            {
                 throw new ArgumentException("appType must be an Application.", nameof(appType));
+            }
 
             assembly ??= Assembly.GetCallingAssembly();
             var viewModels = new Dictionary<string, Type>();
             var viewWithoutViewModels = new List<Type>();
             foreach (var type in assembly.GetTypes())
             {
-                if (type is not Type { IsPublic: true, IsAbstract: false, IsGenericTypeDefinition: false }) continue;
+                if (type is not Type { IsPublic: true, IsAbstract: false, IsGenericTypeDefinition: false })
+                {
+                    continue;
+                }
 
                 if (appType is null && typeof(Application).IsAssignableFrom(type))
                 {
@@ -173,31 +182,53 @@ public static class ServiceCollectionExtensions
                     }
                 }
 
-                if (!typeof(FrameworkElement).IsAssignableFrom(type)) continue;
+                if (!typeof(FrameworkElement).IsAssignableFrom(type))
+                {
+                    continue;
+                }
 
                 var viewAttr = type.GetCustomAttribute<ViewAttribute>();
                 if (viewAttr is null)
+                {
                     if ((typeof(Page).IsAssignableFrom(type) || typeof(Window).IsAssignableFrom(type)) &&
                         (type.Name.EndsWith("View") || type.Name.EndsWith("Page") || type.Name.EndsWith("Window")))
+                    {
                         viewAttr = new ViewAttribute(type.Name);
+                    }
+                }
 
-                if (viewAttr is null) continue;
+                if (viewAttr is null)
+                {
+                    continue;
+                }
+
                 var viewModelAttrs = type.GetCustomAttributes<WithViewModelAttribute>();
                 var builder = services.AddView(type, viewAttr.LifeTime, viewAttr.ViewType ?? type);
                 if (viewAttr.Names.Length > 0)
+                {
                     foreach (var name in viewAttr.Names)
+                    {
                         builder.WithName(name);
+                    }
+                }
                 else
+                {
                     builder.WithName(type.Name);
+                }
 
                 var hasViewModel = false;
                 foreach (var viewModelAttr in viewModelAttrs)
                 {
                     hasViewModel = true;
                     builder.WithViewModel(viewModelAttr.ViewModelType, viewModelAttr.IsDefault);
-                    services.Add(new ServiceDescriptor(viewModelAttr.ViewModelType, viewModelAttr.ViewModelType,
-                        viewModelAttr.LifeTime));
+                    services.Add(
+                        new ServiceDescriptor(
+                            viewModelAttr.ViewModelType, viewModelAttr.ViewModelType,
+                            viewModelAttr.LifeTime
+                        )
+                    );
                 }
+
                 if (!hasViewModel)
                 {
                     viewWithoutViewModels.Add(type);
@@ -231,6 +262,7 @@ public static class ServiceCollectionExtensions
                     viewName = viewName.Substring(0, viewName.Length - "Window".Length);
 #endif
                 }
+
                 if (viewModels.TryGetValue($"{viewName}ViewModel", out var viewModelType))
                 {
                     services.ConfigureView(viewType)
@@ -240,12 +272,14 @@ public static class ServiceCollectionExtensions
 
             if (appType is not null)
             {
-                services.AddSingleton(appType, sp =>
-                {
-                    var app = (Application)ActivatorUtilities.CreateInstance(sp, appType);
-                    app.Resources[ViewManager.ViewManagerResourceKey] = sp.GetRequiredService<ViewManager>();
-                    return app;
-                });
+                services.AddSingleton(
+                    appType, sp =>
+                    {
+                        var app = (Application)ActivatorUtilities.CreateInstance(sp, appType);
+                        app.Resources[ViewManager.ViewManagerResourceKey] = sp.GetRequiredService<ViewManager>();
+                        return app;
+                    }
+                );
                 services.AddSingleton<Application>(sp => (Application)sp.GetRequiredService(appType));
             }
 

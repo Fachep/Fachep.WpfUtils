@@ -4,5 +4,6 @@ namespace Playground;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    [ObservableProperty] public partial string CurrentPage { get; set; } = "";
+    [ObservableProperty]
+    public partial string CurrentPage { get; set; } = string.Empty;
 }

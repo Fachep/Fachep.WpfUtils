@@ -1,4 +1,3 @@
-using Fachep.WpfUtils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fachep.WpfUtils.Tests;
@@ -61,7 +60,8 @@ public sealed class ViewAttributeTests
     public void AttributeUsage_ClassOnly_NotInherited()
     {
         var usage = (AttributeUsageAttribute)Attribute.GetCustomAttribute(
-            typeof(ViewAttribute), typeof(AttributeUsageAttribute))!;
+            typeof(ViewAttribute), typeof(AttributeUsageAttribute)
+        )!;
         Assert.AreEqual(AttributeTargets.Class, usage.ValidOn);
         Assert.IsFalse(usage.Inherited);
     }
