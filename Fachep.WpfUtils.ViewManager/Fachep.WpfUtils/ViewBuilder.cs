@@ -7,6 +7,7 @@ public class ViewBuilder
 {
     private readonly IServiceCollection _services;
     private readonly Type _viewType;
+    private IViewWrapper? _viewWrapper;
 
     private ViewBuilder(Type viewType, IServiceCollection services)
     {
@@ -21,7 +22,9 @@ public class ViewBuilder
         services
             .AddTransient(viewType, sp => ((IViewWrapper)sp.GetRequiredService(wrapperType)).GetInstance(sp))
             .Add(new ServiceDescriptor(wrapperType, _ => viewWrapper.Clone(), viewLifetime));
-        return Create(viewType, services);
+        var builder = Create(viewType, services);
+        builder._viewWrapper = viewWrapper;
+        return builder;
     }
 
     internal static ViewBuilder Create(Type viewType, IServiceCollection services)
@@ -41,7 +44,9 @@ public class ViewBuilder
         ServiceLifetime viewLifetime, Func<IServiceProvider, FrameworkElement> factory)
     {
         var wrapperType = typeof(FactoryViewWrapper<>).MakeGenericType(viewType);
-        var wrapper = (IViewWrapper)Activator.CreateInstance(wrapperType, factory)!;
+        var adapterType = typeof(Func<,>).MakeGenericType(typeof(IServiceProvider), viewType);
+        var adapter = Delegate.CreateDelegate(adapterType, factory.Target, factory.Method);
+        var wrapper = (IViewWrapper)Activator.CreateInstance(wrapperType, adapter)!;
         return Create(viewType, services, viewLifetime, wrapper);
     }
 
@@ -53,10 +58,11 @@ public class ViewBuilder
         return Create(viewType, services, viewLifetime, wrapper);
     }
 
-    public ViewBuilder WithViewModel(Type viewModelType)
+    public ViewBuilder WithViewModel(Type viewModelType, bool isDefault = false)
     {
         _services.AddSingleton(typeof(IViewModelConfiguration<>).MakeGenericType(viewModelType),
             new ViewModelConfiguration(_viewType));
+        _viewWrapper?.WithViewModelType(viewModelType, isDefault);
         return this;
     }
 
@@ -66,16 +72,16 @@ public class ViewBuilder
         return this;
     }
 
-    private interface IViewWrapper
+    internal interface IViewWrapper
     {
         FrameworkElement GetInstance(IServiceProvider serviceProvider);
+        void WithViewModelType(Type viewModelType, bool isDefault = false);
+        Type? DefaultViewModelType { get; }
         IViewWrapper Clone();
     }
 
-    private interface IViewWrapper<out TView> : IViewWrapper
-        where TView : FrameworkElement
-    {
-    }
+    internal interface IViewWrapper<out TView> : IViewWrapper
+        where TView : FrameworkElement;
 
     private abstract class ViewWrapper<TView> : IViewWrapper<TView>
         where TView : FrameworkElement
@@ -86,6 +92,23 @@ public class ViewBuilder
         private readonly object _lock = new();
 #endif
         private TView? _instance;
+
+        Type? IViewWrapper.DefaultViewModelType => _defaultViewModelType ?? _lastViewModelType;
+
+        private Type? _defaultViewModelType;
+        private Type? _lastViewModelType;
+        
+        void IViewWrapper.WithViewModelType(Type viewModelType, bool isDefault)
+        {
+            if (isDefault)
+            {
+                _defaultViewModelType = viewModelType;
+            }
+            else
+            {
+                _lastViewModelType = viewModelType;
+            }
+        }
 
         FrameworkElement IViewWrapper.GetInstance(IServiceProvider serviceProvider)
         {
@@ -155,6 +178,23 @@ public class ViewBuilder
     private class InstanceViewWrapper<TView>(TView instance) : IViewWrapper<TView>
         where TView : FrameworkElement
     {
+        Type? IViewWrapper.DefaultViewModelType => _defaultViewModelType ?? _lastViewModelType;
+
+        private Type? _defaultViewModelType;
+        private Type? _lastViewModelType;
+        
+        void IViewWrapper.WithViewModelType(Type viewModelType, bool isDefault)
+        {
+            if (isDefault)
+            {
+                _defaultViewModelType = viewModelType;
+            }
+            else
+            {
+                _lastViewModelType = viewModelType;
+            }
+        }
+        
         FrameworkElement IViewWrapper.GetInstance(IServiceProvider serviceProvider)
         {
             return instance;

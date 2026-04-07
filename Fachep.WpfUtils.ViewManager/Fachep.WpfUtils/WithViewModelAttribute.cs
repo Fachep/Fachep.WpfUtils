@@ -7,4 +7,5 @@ public class WithViewModelAttribute(Type viewModelType) : Attribute
 {
     public Type ViewModelType => viewModelType;
     public ServiceLifetime LifeTime { get; set; } = ServiceLifetime.Singleton;
+    public bool IsDefault { get; set; } = false;
 }

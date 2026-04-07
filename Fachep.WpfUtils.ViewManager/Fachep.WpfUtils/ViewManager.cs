@@ -11,6 +11,8 @@ public class ViewManager(IServiceProvider serviceProvider)
         Action<object>? viewModelCallback = null)
     {
         if (serviceProvider.GetService(viewType) is not FrameworkElement view) return null;
+        viewModelType ??= (serviceProvider.GetService(typeof(ViewBuilder.IViewWrapper<>).MakeGenericType(viewType)) as
+            ViewBuilder.IViewWrapper)?.DefaultViewModelType;
         if (viewModelType is not null && serviceProvider.GetService(viewModelType) is { } viewModel)
         {
             viewModelCallback?.Invoke(viewModel);
@@ -20,10 +22,21 @@ public class ViewManager(IServiceProvider serviceProvider)
         return view;
     }
 
+    public FrameworkElement? GetView(Type viewType, Action<object> viewModelCallback)
+    {
+        return GetView(viewType, viewModelType: null, viewModelCallback);
+    }
+
     public TView? GetView<TView>(Type? viewModelType = null, Action<object>? viewModelCallback = null)
         where TView : FrameworkElement
     {
         return GetView(typeof(TView), viewModelType, viewModelCallback) as TView;
+    }
+
+    public TView? GetView<TView>(Action<object> viewModelCallback)
+        where TView : FrameworkElement
+    {
+        return GetView<TView>(viewModelType: null, viewModelCallback);
     }
 
     public TView? GetView<TView, TViewModel>(Action<TViewModel>? viewModelCallback = null)
@@ -100,6 +113,8 @@ public class ViewManager(IServiceProvider serviceProvider)
     {
         if (serviceProvider.GetKeyedService<ViewBuilder.IViewNameConfiguration>(name) is not { } config) return null;
         if (serviceProvider.GetService(config.ViewType) is not FrameworkElement view) return null;
+        viewModelType ??= (serviceProvider.GetService(typeof(ViewBuilder.IViewWrapper<>).MakeGenericType(config.ViewType)) as
+            ViewBuilder.IViewWrapper)?.DefaultViewModelType;
         if (viewModelType is null) return view;
         var viewModel = keyedViewModel
             ? serviceProvider.GetKeyedService(viewModelType, name)
@@ -113,11 +128,22 @@ public class ViewManager(IServiceProvider serviceProvider)
         return view;
     }
 
+    public FrameworkElement? GetView(string name, Action<object> viewModelCallback, bool keyedViewModel = false)
+    {
+        return GetView(name, viewModelType: null, keyedViewModel, viewModelCallback);
+    }
+
     public TView? GetView<TView>(string name, Type? viewModelType = null, bool keyedViewModel = false,
         Action<object>? viewModelCallback = null)
         where TView : FrameworkElement
     {
         return GetView(name, viewModelType, keyedViewModel, viewModelCallback) as TView;
+    }
+
+    public TView? GetView<TView>(string name, Action<object> viewModelCallback, bool keyedViewModel = false)
+        where TView : FrameworkElement
+    {
+        return GetView<TView>(name, viewModelType: null, keyedViewModel, viewModelCallback);
     }
 
     public TView? GetView<TView, TViewModel>(string name, bool keyedViewModel = false,

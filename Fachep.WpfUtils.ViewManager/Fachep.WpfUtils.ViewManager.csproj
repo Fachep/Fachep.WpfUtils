@@ -19,4 +19,8 @@
         <None Remove="aaa.md" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Fachep.WpfUtils.ViewManager.Tests" />
+    </ItemGroup>
+
 </Project>

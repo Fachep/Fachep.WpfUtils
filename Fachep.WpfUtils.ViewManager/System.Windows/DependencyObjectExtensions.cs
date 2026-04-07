@@ -2,124 +2,138 @@ using Fachep.WpfUtils;
 
 namespace System.Windows;
 
-public static class ApplicationExtensions
+public static class DependencyObjectExtensions
 {
-    extension(Application app)
+    extension(DependencyObject targetObject)
     {
-        public ViewManager ViewManager => (ViewManager)app.Resources[ViewManager.ViewManagerResourceKey]!;
+        public ViewManager ViewManager
+        {
+            get
+            {
+                return targetObject switch
+                {
+                    FrameworkElement fe => (ViewManager)fe.FindResource(ViewManager.ViewManagerResourceKey),
+                    FrameworkContentElement fce => (ViewManager)fce.FindResource(ViewManager.ViewManagerResourceKey),
+                    _ => (ViewManager)Application.Current.FindResource(ViewManager.ViewManagerResourceKey) ??
+                         throw new InvalidOperationException(
+                             $"Cannot find {nameof(ViewManager)} resource for {targetObject.GetType().FullName}")
+                };
+            }
+        }
 
         public FrameworkElement? GetView(Type viewType, Type? viewModelType = null,
             Action<object>? viewModelCallback = null)
         {
-            return app.ViewManager.GetView(viewType, viewModelType, viewModelCallback);
+            return targetObject.ViewManager.GetView(viewType, viewModelType, viewModelCallback);
         }
 
         public TView? GetView<TView>(Type? viewModelType = null, Action<object>? viewModelCallback = null)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView>(viewModelType, viewModelCallback);
+            return targetObject.ViewManager.GetView<TView>(viewModelType, viewModelCallback);
         }
 
         public TView? GetView<TView, TViewModel>(Action<TViewModel>? viewModelCallback = null)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView, TViewModel>(viewModelCallback);
+            return targetObject.ViewManager.GetView<TView, TViewModel>(viewModelCallback);
         }
 
         public FrameworkElement? GetViewByViewModel(Type viewModelType, Action<object>? viewModelCallback = null)
         {
-            return app.ViewManager.GetViewByViewModel(viewModelType, viewModelCallback);
+            return targetObject.ViewManager.GetViewByViewModel(viewModelType, viewModelCallback);
         }
 
         public FrameworkElement? GetViewByViewModel<TViewModel>(Action<TViewModel>? viewModelCallback = null)
         {
-            return app.ViewManager.GetViewByViewModel(viewModelCallback);
+            return targetObject.ViewManager.GetViewByViewModel(viewModelCallback);
         }
 
         public TView? GetViewByViewModel<TViewModel, TView>(Action<TViewModel>? viewModelCallback = null)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModelCallback);
+            return targetObject.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModelCallback);
         }
 
         public FrameworkElement? GetView(string name, Type? viewModelType = null, bool keyedViewModel = false,
             Action<object>? viewModelCallback = null)
         {
-            return app.ViewManager.GetView(name, viewModelType, keyedViewModel, viewModelCallback);
+            return targetObject.ViewManager.GetView(name, viewModelType, keyedViewModel, viewModelCallback);
         }
 
         public TView? GetView<TView>(string name, Type? viewModelType = null, bool keyedViewModel = false,
             Action<object>? viewModelCallback = null)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView>(name, viewModelType, keyedViewModel, viewModelCallback);
+            return targetObject.ViewManager.GetView<TView>(name, viewModelType, keyedViewModel, viewModelCallback);
         }
 
         public TView? GetView<TView, TViewModel>(string name, bool keyedViewModel = false,
             Action<TViewModel>? viewModelCallback = null)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView, TViewModel>(name, keyedViewModel, viewModelCallback);
+            return targetObject.ViewManager.GetView<TView, TViewModel>(name, keyedViewModel, viewModelCallback);
         }
-
+        
         public FrameworkElement? GetView(Type viewType, object viewModel)
         {
-            return app.ViewManager.GetView(viewType, viewModel);
+            return targetObject.ViewManager.GetView(viewType, viewModel);
         }
 
         public TView? GetView<TView>(object viewModel)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView>(viewModel);
+            return targetObject.ViewManager.GetView<TView>(viewModel);
         }
 
         public FrameworkElement? GetViewByViewModel(Type viewModelType, object viewModel)
         {
-            return app.ViewManager.GetViewByViewModel(viewModelType, viewModel);
+            return targetObject.ViewManager.GetViewByViewModel(viewModelType, viewModel);
         }
 
         public FrameworkElement? GetViewByViewModel<TViewModel>(TViewModel viewModel)
         {
-            return app.ViewManager.GetViewByViewModel(viewModel);
+            return targetObject.ViewManager.GetViewByViewModel(viewModel);
         }
 
         public TView? GetViewByViewModel<TViewModel, TView>(TViewModel viewModel)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModel);
+            return targetObject.ViewManager.GetViewByViewModel<TViewModel, TView>(viewModel);
         }
 
         public FrameworkElement? GetView(string name, object viewModel)
         {
-            return app.ViewManager.GetView(name, viewModel);
+            return targetObject.ViewManager.GetView(name, viewModel);
         }
 
         public TView? GetView<TView>(string name, object viewModel)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView>(name, viewModel);
+            return targetObject.ViewManager.GetView<TView>(name, viewModel);
         }
-
+        
+        
         public FrameworkElement? GetView(Type viewType, Action<object> viewModelCallback)
         {
-            return app.ViewManager.GetView(viewType, viewModelCallback);
+            return targetObject.ViewManager.GetView(viewType, viewModelCallback);
         }
 
         public TView? GetView<TView>(Action<object> viewModelCallback)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView>(viewModelCallback);
+            return targetObject.ViewManager.GetView<TView>(viewModelCallback);
         }
 
         public FrameworkElement? GetView(string name, Action<object> viewModelCallback, bool keyedViewModel = false)
         {
-            return app.ViewManager.GetView(name, viewModelCallback, keyedViewModel);
+            return targetObject.ViewManager.GetView(name, viewModelCallback, keyedViewModel);
         }
 
         public TView? GetView<TView>(string name, Action<object> viewModelCallback, bool keyedViewModel = false)
             where TView : FrameworkElement
         {
-            return app.ViewManager.GetView<TView>(name, viewModelCallback, keyedViewModel);
+            return targetObject.ViewManager.GetView<TView>(name, viewModelCallback, keyedViewModel);
         }
     }
 }

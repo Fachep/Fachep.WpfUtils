@@ -153,6 +153,8 @@ public static class ServiceCollectionExtensions
                 throw new ArgumentException("appType must be an Application.", nameof(appType));
 
             assembly ??= Assembly.GetCallingAssembly();
+            var viewModels = new Dictionary<string, Type>();
+            var viewWithoutViewModels = new List<Type>();
             foreach (var type in assembly.GetTypes())
             {
                 if (type is not Type { IsPublic: true, IsAbstract: false, IsGenericTypeDefinition: false }) continue;
@@ -160,6 +162,17 @@ public static class ServiceCollectionExtensions
                 if (appType is null && typeof(Application).IsAssignableFrom(type))
                 {
                     appType = type;
+                    continue;
+                }
+
+                if (type.Name.EndsWith("ViewModel"))
+                {
+#if NETCOREAPP
+                    
+                    viewModels[type.Name[..^"ViewModel".Length]] = type;
+#else
+                    viewModels[type.Name.Substring(0, type.Name.Length - "ViewModel".Length)] = type;
+#endif
                     continue;
                 }
 
@@ -180,11 +193,26 @@ public static class ServiceCollectionExtensions
                 else
                     builder.WithName(type.Name);
 
+                var hasViewModel = false;
                 foreach (var viewModelAttr in viewModelAttrs)
                 {
-                    builder.WithViewModel(viewModelAttr.ViewModelType);
+                    hasViewModel = true;
+                    builder.WithViewModel(viewModelAttr.ViewModelType, viewModelAttr.IsDefault);
                     services.Add(new ServiceDescriptor(viewModelAttr.ViewModelType, viewModelAttr.ViewModelType,
                         viewModelAttr.LifeTime));
+                }
+                if (!hasViewModel)
+                {
+                    viewWithoutViewModels.Add(type);
+                }
+            }
+
+            foreach (var viewType in viewWithoutViewModels)
+            {
+                if (viewModels.TryGetValue(viewType.Name, out var viewModelType))
+                {
+                    services.ConfigureView(viewType)
+                        .WithViewModel(viewModelType);
                 }
             }
 
