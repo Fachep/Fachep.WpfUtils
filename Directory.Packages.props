@@ -6,7 +6,7 @@
     <ItemGroup>
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-        <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
+        <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.7" />
         <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
     </ItemGroup>
     <ItemGroup>
