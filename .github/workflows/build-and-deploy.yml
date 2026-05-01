@@ -74,7 +74,7 @@ jobs:
 
       - name: ReportGenerator
         if: ${{ inputs.test }}
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.7
         with:
           reports: '**/TestResults/coverage.cobertura.xml'
           targetdir: coveragereport
@@ -129,7 +129,7 @@ jobs:
           name: NuGet
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           working_directory: ${{ github.workspace }}
           files: ./*.nupkg
